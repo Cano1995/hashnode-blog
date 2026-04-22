@@ -1,16 +1,57 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { Navbar } from "@/components/blog/Navbar";
 import { Footer } from "@/components/blog/Footer";
 import { TagBadge } from "@/components/blog/TagBadge";
+import { PostContent } from "@/components/blog/PostContent";
+import { ViewTracker } from "@/components/blog/ViewTracker";
 import { formatDate } from "@/lib/utils";
 import { Clock, Eye, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 type Params = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await prisma.post.findUnique({
+    where: { slug, published: true },
+    include: { tags: { include: { tag: true } } },
+  });
+
+  if (!post) return {};
+
+  const description = post.excerpt
+    ? post.excerpt.replace(/<[^>]*>/g, "").slice(0, 160)
+    : `Artículo de Paraguayan Dev sobre ${post.tags.map((t) => t.tag.name).join(", ")}`;
+
+  return {
+    title: post.title,
+    description,
+    alternates: { canonical: `${SITE_URL}/${slug}` },
+    openGraph: {
+      title: post.title,
+      description,
+      url: `${SITE_URL}/${slug}`,
+      type: "article",
+      publishedTime: post.createdAt.toISOString(),
+      modifiedTime: post.updatedAt.toISOString(),
+      tags: post.tags.map((t) => t.tag.name),
+      ...(post.coverImage ? { images: [{ url: post.coverImage, width: 1200, height: 630, alt: post.title }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
+      ...(post.coverImage ? { images: [post.coverImage] } : {}),
+    },
+  };
+}
 
 export default async function PostPage({ params }: Params) {
   const { slug } = await params;
@@ -25,54 +66,79 @@ export default async function PostPage({ params }: Params) {
 
   if (!post) notFound();
 
-  await prisma.post.update({ where: { id: post.id }, data: { views: { increment: 1 } } });
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt?.replace(/<[^>]*>/g, "") ?? "",
+    url: `${SITE_URL}/${slug}`,
+    datePublished: post.createdAt.toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    author: { "@type": "Person", name: settings.authorName },
+    publisher: {
+      "@type": "Organization",
+      name: settings.title,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/icon.png` },
+    },
+    ...(post.coverImage ? { image: post.coverImage } : {}),
+    keywords: post.tags.map((t) => t.tag.name).join(", "),
+    inLanguage: "es",
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--c-bg)" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ViewTracker slug={slug} />
       <Navbar siteName={settings.title} />
       <main className="flex-1">
         {post.coverImage && (
-          <div className="relative h-72 md:h-96 w-full">
+          <div className="relative h-64 md:h-80 w-full">
             <Image src={post.coverImage} alt={post.title} fill className="object-cover" priority />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--c-bg) 0%, transparent 60%)" }} />
           </div>
         )}
 
-        <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <article className="max-w-[720px] mx-auto px-4 sm:px-6 py-10">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600 mb-8 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm mb-8 transition-opacity hover:opacity-70"
+            style={{ color: "var(--c-muted)" }}
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5" />
             Volver al inicio
           </Link>
 
           <header className="mb-8">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {post.tags.map(({ tag }) => (
-                <TagBadge key={tag.id} name={tag.name} slug={tag.slug} color={tag.color} size="md" />
-              ))}
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-4">
+            {post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {post.tags.map(({ tag }) => (
+                  <TagBadge key={tag.id} name={tag.name} slug={tag.slug} color={tag.color} size="md" />
+                ))}
+              </div>
+            )}
+            <h1 className="text-2xl md:text-3xl font-bold leading-snug mb-4" style={{ color: "var(--c-text)" }}>
               {post.title}
             </h1>
-            <div className="flex items-center gap-5 text-sm text-gray-500">
+            <div
+              className="flex flex-wrap items-center gap-4 text-xs pb-6"
+              style={{ color: "var(--c-subtle)", borderBottom: "1px solid var(--c-border)" }}
+            >
               <span>{formatDate(post.createdAt)}</span>
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4" />
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
                 {post.readingTime} min de lectura
               </span>
-              <span className="flex items-center gap-1.5">
-                <Eye className="w-4 h-4" />
-                {post.views} vistas
+              <span className="flex items-center gap-1">
+                <Eye className="w-3 h-3" />
+                {post.views.toLocaleString()} vistas
               </span>
             </div>
           </header>
 
-          <div
-            className="prose max-w-none"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+          <PostContent html={post.content} />
         </article>
       </main>
       <Footer
