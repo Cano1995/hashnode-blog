@@ -7,7 +7,7 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import { SITE_URL } from "@/lib/siteUrl";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   alternates: { canonical: SITE_URL },

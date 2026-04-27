@@ -6,7 +6,7 @@ import { Footer } from "@/components/blog/Footer";
 import Link from "next/link";
 import { SITE_URL } from "@/lib/siteUrl";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Etiquetas",

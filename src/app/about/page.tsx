@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { SITE_URL } from "@/lib/siteUrl";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 const AUTHOR_LINKEDIN =
   "https://www.linkedin.com/in/cristhian-cano-bogado-orclapex-86473713b/";

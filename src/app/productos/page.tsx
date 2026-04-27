@@ -7,7 +7,7 @@ import { Footer } from "@/components/blog/Footer";
 import { SITE_URL } from "@/lib/siteUrl";
 import { ExternalLink, Star, Tag } from "lucide-react";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Cursos de Oracle APEX recomendados",

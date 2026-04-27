@@ -7,7 +7,7 @@ import { PostCard } from "@/components/blog/PostCard";
 import Link from "next/link";
 import { SITE_URL } from "@/lib/siteUrl";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ tag: string }> };
 

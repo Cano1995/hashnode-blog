@@ -6,7 +6,7 @@ import { Footer } from "@/components/blog/Footer";
 import { SITE_URL } from "@/lib/siteUrl";
 import { CheckCircle, Star } from "lucide-react";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 const AUTHOR_LINKEDIN = "https://www.linkedin.com/in/cristhian-cano-bogado-orclapex-86473713b/";
 

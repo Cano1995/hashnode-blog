@@ -12,7 +12,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { SITE_URL } from "@/lib/siteUrl";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ slug: string }> };
 
