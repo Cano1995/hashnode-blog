@@ -6,14 +6,19 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    const token = await getToken({
-      req: request,
-      secret: process.env.AUTH_SECRET,
-    });
+    try {
+      const token = await getToken({
+        req: request,
+        secret: process.env.AUTH_SECRET,
+      });
 
-    if (!token) {
+      if (!token) {
+        const loginUrl = new URL("/admin/login", request.url);
+        loginUrl.searchParams.set("callbackUrl", pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+    } catch {
       const loginUrl = new URL("/admin/login", request.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
   }
