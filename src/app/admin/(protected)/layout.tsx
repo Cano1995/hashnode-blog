@@ -9,7 +9,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     cookieStore.has("__Secure-authjs.session-token") ||
     cookieStore.has("authjs.session-token");
 
-  if (!hasSession) redirect("/admin/login");
+  if (!hasSession) redirect("/login");
 
   return (
     <SessionProvider>
