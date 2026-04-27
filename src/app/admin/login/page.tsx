@@ -93,9 +93,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-xs text-center text-gray-400">
-            Usuario: <code className="bg-gray-100 px-1 rounded">admin</code> / Contraseña: <code className="bg-gray-100 px-1 rounded">admin123</code>
-          </p>
         </div>
       </div>
     </div>

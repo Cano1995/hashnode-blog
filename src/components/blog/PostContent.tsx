@@ -9,7 +9,6 @@ export function PostContent({ html }: { html: string }) {
   const safeHtml = useMemo(() => {
     const sanitized = DOMPurify.sanitize(html, {
       USE_PROFILES: { html: true },
-      ADD_TAGS: ["iframe"],
       ADD_ATTR: ["target", "rel", "loading"],
     });
     // Inyecta lazy loading en imágenes del contenido — DOMPurify no lo hace por defecto

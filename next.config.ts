@@ -1,15 +1,40 @@
 import type { NextConfig } from "next";
 
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-XSS-Protection", value: "1; mode=block" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  {
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self'",
+      "connect-src 'self'",
+      "frame-ancestors 'none'",
+    ].join("; "),
+  },
+];
+
 const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: securityHeaders,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
-      // Agrega aquí los dominios reales de tus imágenes antes de ir a producción.
-      // Usar hostname: "**" permite cualquier origen y es un riesgo de seguridad.
-      // Ejemplos:
-      //   { protocol: "https", hostname: "cdn.paraguayandev.com" },
-      //   { protocol: "https", hostname: "res.cloudinary.com" },
-      //   { protocol: "https", hostname: "images.unsplash.com" },
-      { protocol: "https", hostname: "**" }, // TODO: restringir antes de producción
+      { protocol: "https", hostname: "cdn.hashnode.com" },
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "**.amazonaws.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "http", hostname: "localhost" },
     ],
   },
