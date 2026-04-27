@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Editor } from "./Editor";
-import { Loader2, Save, Eye } from "lucide-react";
+import { Loader2, Save, Eye, RotateCcw } from "lucide-react";
 import type { Post, Tag } from "@/generated/prisma/client";
 
 interface PostFormProps {
@@ -11,8 +11,18 @@ interface PostFormProps {
   allTags: Tag[];
 }
 
+interface DraftData {
+  title: string;
+  content: string;
+  excerpt: string;
+  coverImage: string;
+  savedAt: number;
+}
+
 export function PostForm({ post, allTags }: PostFormProps) {
   const router = useRouter();
+  const draftKey = `draft-${post?.id ?? "new"}`;
+
   const [title, setTitle] = useState(post?.title ?? "");
   const [content, setContent] = useState(post?.content ?? "");
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
@@ -24,6 +34,61 @@ export function PostForm({ post, allTags }: PostFormProps) {
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [draftBanner, setDraftBanner] = useState(false);
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Check for saved draft on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const draft: DraftData = JSON.parse(raw);
+      const hasChanges =
+        draft.title !== (post?.title ?? "") ||
+        draft.content !== (post?.content ?? "");
+      if (hasChanges) setDraftBanner(true);
+    } catch {}
+  }, []);
+
+  // Auto-save to localStorage with 3s debounce
+  useEffect(() => {
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      try {
+        const draft: DraftData = {
+          title,
+          content,
+          excerpt,
+          coverImage,
+          savedAt: Date.now(),
+        };
+        localStorage.setItem(draftKey, JSON.stringify(draft));
+        setLastSaved(new Date().toLocaleTimeString());
+      } catch {}
+    }, 3000);
+    return () => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    };
+  }, [title, content, excerpt, coverImage]);
+
+  function restoreDraft() {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const draft: DraftData = JSON.parse(raw);
+      setTitle(draft.title);
+      setContent(draft.content);
+      setExcerpt(draft.excerpt);
+      setCoverImage(draft.coverImage);
+    } catch {}
+    setDraftBanner(false);
+  }
+
+  function dismissDraft() {
+    localStorage.removeItem(draftKey);
+    setDraftBanner(false);
+  }
 
   function toggleTag(tagId: string) {
     setSelectedTags((prev) =>
@@ -63,16 +128,31 @@ export function PostForm({ post, allTags }: PostFormProps) {
       return setError(data.error ?? "Error al guardar");
     }
 
-    const saved = await res.json();
+    localStorage.removeItem(draftKey);
     router.push("/admin/posts");
     router.refresh();
   }
 
   return (
     <div className="flex flex-col h-full">
+      {draftBanner && (
+        <div className="flex items-center justify-between px-6 py-2 bg-amber-50 border-b border-amber-200 text-sm text-amber-800">
+          <span>Hay un borrador guardado localmente. ¿Deseas restaurarlo?</span>
+          <div className="flex gap-3">
+            <button onClick={restoreDraft} className="flex items-center gap-1 font-medium hover:underline">
+              <RotateCcw className="w-3.5 h-3.5" /> Restaurar
+            </button>
+            <button onClick={dismissDraft} className="text-amber-600 hover:underline">Descartar</button>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
         <div>
           <h1 className="text-xl font-bold text-gray-900">{post ? "Editar artículo" : "Nuevo artículo"}</h1>
+          {lastSaved && (
+            <p className="text-xs text-gray-400 mt-0.5">Borrador local guardado a las {lastSaved}</p>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {error && <p className="text-sm text-red-600">{error}</p>}
@@ -114,7 +194,7 @@ export function PostForm({ post, allTags }: PostFormProps) {
               </div>
             )}
 
-            <Editor content={content} onChange={setContent} />
+            <Editor key={content !== post?.content ? "restored" : "original"} content={content} onChange={setContent} />
           </div>
         </div>
 

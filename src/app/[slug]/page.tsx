@@ -10,10 +10,9 @@ import { formatDate } from "@/lib/utils";
 import { Clock, Eye, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { SITE_URL } from "@/lib/siteUrl";
 
 export const revalidate = 3600;
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -66,7 +65,19 @@ export default async function PostPage({ params }: Params) {
 
   if (!post) notFound();
 
-  const jsonLd = {
+  const related = await prisma.post.findMany({
+    where: {
+      published: true,
+      id: { not: post.id },
+      tags: { some: { tagId: { in: post.tags.map((t) => t.tagId) } } },
+    },
+    take: 3,
+    orderBy: { createdAt: "desc" },
+    select: { id: true, slug: true, title: true, createdAt: true, readingTime: true },
+  });
+
+  const jsonLd = [
+  {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
@@ -83,7 +94,16 @@ export default async function PostPage({ params }: Params) {
     ...(post.coverImage ? { image: post.coverImage } : {}),
     keywords: post.tags.map((t) => t.tag.name).join(", "),
     inLanguage: "es",
-  };
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Inicio", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: post.title, item: `${SITE_URL}/${slug}` },
+    ],
+  },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--c-bg)" }}>
@@ -93,7 +113,7 @@ export default async function PostPage({ params }: Params) {
       />
       <ViewTracker slug={slug} />
       <Navbar siteName={settings.title} />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {post.coverImage && (
           <div className="relative h-64 md:h-80 w-full">
             <Image src={post.coverImage} alt={post.title} fill className="object-cover" priority />
@@ -139,6 +159,41 @@ export default async function PostPage({ params }: Params) {
           </header>
 
           <PostContent html={post.content} />
+
+          {/* Posts relacionados */}
+          {related.length > 0 && (
+            <section
+              className="mt-12 pt-8"
+              style={{ borderTop: "1px solid var(--c-border)" }}
+              aria-label="Artículos relacionados"
+            >
+              <h2
+                className="text-xs font-semibold uppercase tracking-wider mb-5"
+                style={{ color: "var(--c-muted)" }}
+              >
+                Artículos relacionados
+              </h2>
+              <div className="space-y-4">
+                {related.map((r) => (
+                  <Link
+                    key={r.id}
+                    href={`/${r.slug}`}
+                    className="block group"
+                  >
+                    <p
+                      className="text-sm font-medium group-hover:underline transition-colors"
+                      style={{ color: "var(--c-text)" }}
+                    >
+                      {r.title}
+                    </p>
+                    <p className="text-xs mt-0.5" style={{ color: "var(--c-subtle)" }}>
+                      {formatDate(r.createdAt)} · {r.readingTime} min de lectura
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
         </article>
       </main>
       <Footer

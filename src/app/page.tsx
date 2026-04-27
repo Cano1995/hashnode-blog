@@ -5,11 +5,12 @@ import { PostCard, PostCardFeatured } from "@/components/blog/PostCard";
 import { TagBadge } from "@/components/blog/TagBadge";
 import { Search } from "lucide-react";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/siteUrl";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata = {
-  alternates: { canonical: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000" },
+  alternates: { canonical: SITE_URL },
 };
 
 export default async function HomePage({
@@ -74,7 +75,14 @@ export default async function HomePage({
     <div className="min-h-screen flex flex-col">
       <Navbar siteName={settings.title} />
 
-      <main className="flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 py-8">
+      <main id="main-content" className="flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 py-8">
+        {/* H1 visible solo cuando no se filtra — señal temática para Google */}
+        {!isFiltering && (
+          <h1 className="sr-only">
+            Blog de Oracle APEX, Oracle Forms y Desarrollo Empresarial — Paraguayan Dev
+          </h1>
+        )}
+
         <div className="flex gap-8 items-start">
 
           {/* ── Main content ─────────────────────────────── */}

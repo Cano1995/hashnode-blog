@@ -1,9 +1,20 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
+import DOMPurify from "isomorphic-dompurify";
 
 export function PostContent({ html }: { html: string }) {
   const ref = useRef<HTMLDivElement>(null);
+
+  const safeHtml = useMemo(() => {
+    const sanitized = DOMPurify.sanitize(html, {
+      USE_PROFILES: { html: true },
+      ADD_TAGS: ["iframe"],
+      ADD_ATTR: ["target", "rel", "loading"],
+    });
+    // Inyecta lazy loading en imágenes del contenido — DOMPurify no lo hace por defecto
+    return sanitized.replace(/<img(?![^>]*\bloading=)/g, '<img loading="lazy"');
+  }, [html]);
 
   useEffect(() => {
     const container = ref.current;
@@ -32,13 +43,13 @@ export function PostContent({ html }: { html: string }) {
 
       pre.appendChild(btn);
     });
-  }, [html]);
+  }, [safeHtml]);
 
   return (
     <div
       ref={ref}
       className="prose max-w-none"
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
   );
 }

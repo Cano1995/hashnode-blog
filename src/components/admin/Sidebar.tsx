@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -8,8 +9,8 @@ import {
   Tag,
   Settings,
   LogOut,
-  PenSquare,
   Eye,
+  Mail,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/posts", label: "Artículos", icon: FileText, exact: false },
   { href: "/admin/tags", label: "Etiquetas", icon: Tag, exact: false },
+  { href: "/admin/subscribers", label: "Suscriptores", icon: Mail, exact: false },
   { href: "/admin/settings", label: "Configuración", icon: Settings, exact: false },
 ];
 
@@ -28,9 +30,7 @@ export function AdminSidebar() {
     <aside className="w-64 min-h-screen bg-gray-900 text-gray-300 flex flex-col">
       <div className="p-6 border-b border-gray-800">
         <Link href="/admin" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <PenSquare className="w-4 h-4 text-white" />
-          </div>
+          <Image src="/icon.png" alt="Blog Admin" width={32} height={32} className="rounded-lg" />
           <span className="text-white font-bold text-lg">Blog Admin</span>
         </Link>
       </div>

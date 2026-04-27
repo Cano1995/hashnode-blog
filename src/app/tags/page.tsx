@@ -4,10 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { Navbar } from "@/components/blog/Navbar";
 import { Footer } from "@/components/blog/Footer";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/siteUrl";
 
 export const revalidate = 3600;
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   title: "Etiquetas",
@@ -32,9 +31,11 @@ export default async function TagsPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--c-bg)" }}>
       <Navbar siteName={settings.title} />
-      <main className="flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 py-10">
+      <main id="main-content" className="flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 py-10">
         <div className="mb-6">
-          <h1 className="text-xl font-bold mb-1" style={{ color: "var(--c-text)" }}>Etiquetas</h1>
+          <h1 className="text-xl font-bold mb-1" style={{ color: "var(--c-text)" }}>
+            Etiquetas — Oracle APEX, SQL, Oracle Forms y más
+          </h1>
           <p className="text-sm" style={{ color: "var(--c-muted)" }}>{tags.length} etiquetas disponibles</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">

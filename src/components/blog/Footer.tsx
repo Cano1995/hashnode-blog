@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { SubscribeForm } from "./SubscribeForm";
 
 interface FooterProps {
   siteName?: string;
@@ -17,7 +18,17 @@ export function Footer({ siteName = "Blog", twitterUrl, githubUrl, linkedinUrl }
 
   return (
     <footer style={{ background: "var(--c-surface)", borderTop: "1px solid var(--c-border)" }}>
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-10">
+        <div className="mb-8 pb-8" style={{ borderBottom: "1px solid var(--c-border)" }}>
+          <p className="text-sm font-semibold mb-1" style={{ color: "var(--c-text)" }}>
+            Suscríbete al newsletter
+          </p>
+          <p className="text-xs mb-3" style={{ color: "var(--c-subtle)" }}>
+            Recibe un correo cuando publique un nuevo artículo.
+          </p>
+          <SubscribeForm />
+        </div>
+
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <Link href="/" className="flex items-center gap-2">
             <Image src="/icon.png" alt={siteName} width={24} height={24} className="rounded-md opacity-80 dark:invert" />

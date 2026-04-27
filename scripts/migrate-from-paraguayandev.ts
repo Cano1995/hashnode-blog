@@ -118,7 +118,6 @@ async function ensureTag(name: string, tagSlug: string): Promise<string> {
     oracle: "#e35a16",
     plsql: "#c0392b",
     sql: "#2980b9",
-    javascript: "#f1c40f",
     javascript: "#f39c12",
     python: "#3498db",
     html: "#e74c3c",

@@ -51,3 +51,12 @@ model SiteSettings {
   githubUrl   String @default("")
   linkedinUrl String @default("")
 }
+
+model Subscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  confirmed    Boolean  @default(false)
+  confirmToken String   @unique @default(cuid())
+  unsubToken   String   @unique @default(cuid())
+  createdAt    DateTime @default(now())
+}

@@ -2,10 +2,14 @@ import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import path from "path";
 
-const dbPath = path.resolve(process.cwd(), "dev.db");
+function resolveDbPath() {
+  const url = process.env.DATABASE_URL ?? "file:./dev.db";
+  const filePath = url.startsWith("file:") ? url.slice(5) : url;
+  return path.isAbsolute(filePath) ? filePath : path.resolve(process.cwd(), filePath);
+}
 
 function createPrismaClient() {
-  const adapter = new PrismaBetterSqlite3({ url: dbPath });
+  const adapter = new PrismaBetterSqlite3({ url: resolveDbPath() });
   return new PrismaClient({ adapter });
 }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { calculateReadingTime } from "@/lib/utils";
+import { sendNewPostEmail } from "@/lib/email";
 import slugify from "slugify";
 
 type Params = { params: Promise<{ id: string }> };
@@ -41,6 +42,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
   await prisma.postTag.deleteMany({ where: { postId: id } });
 
+  const willPublish = published === true && !existing.published;
+
   const post = await prisma.post.update({
     where: { id },
     data: {
@@ -58,6 +61,20 @@ export async function PUT(request: NextRequest, { params }: Params) {
     },
     include: { tags: { include: { tag: true } } },
   });
+
+  if (willPublish) {
+    const subscribers = await prisma.subscriber.findMany({
+      where: { confirmed: true },
+      select: { email: true, unsubToken: true },
+    });
+    if (subscribers.length > 0) {
+      sendNewPostEmail(subscribers, {
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt,
+      }).catch((err) => console.error("Error enviando notificaciones:", err));
+    }
+  }
 
   return NextResponse.json(post);
 }

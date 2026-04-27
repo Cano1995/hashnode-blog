@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 const NAV_LINKS = [
   { href: "/", label: "Artículos" },
   { href: "/tags", label: "Etiquetas" },
+  { href: "/about", label: "Sobre mí" },
 ];
 
 function NavLink({ href, label }: { href: string; label: string }) {
@@ -73,6 +74,7 @@ export function Navbar({ siteName = "Blog" }: { siteName?: string }) {
 
           {/* Desktop search */}
           <form onSubmit={handleSearch} className="hidden md:block">
+            <label htmlFor="nav-search" className="sr-only">Buscar artículos</label>
             <div
               className="flex items-center gap-2 px-3 h-8 rounded-md text-sm transition-all w-48 focus-within:w-64"
               style={{
@@ -83,6 +85,7 @@ export function Navbar({ siteName = "Blog" }: { siteName?: string }) {
             >
               <Search className="w-3.5 h-3.5 shrink-0" />
               <input
+                id="nav-search"
                 ref={inputRef}
                 type="search"
                 value={query}
@@ -113,12 +116,14 @@ export function Navbar({ siteName = "Blog" }: { siteName?: string }) {
         {mobileOpen && (
           <div className="md:hidden pb-4 pt-2 space-y-1" style={{ borderTop: "1px solid var(--c-border)" }}>
             <form onSubmit={handleSearch} className="mb-3">
+              <label htmlFor="nav-search-mobile" className="sr-only">Buscar artículos</label>
               <div
                 className="flex items-center gap-2 px-3 h-9 rounded-md"
                 style={{ background: "var(--c-surface)", border: "1px solid var(--c-border)" }}
               >
                 <Search className="w-4 h-4 shrink-0" style={{ color: "var(--c-muted)" }} />
                 <input
+                  id="nav-search-mobile"
                   type="search"
                   value={query}
                   onChange={e => setQuery(e.target.value)}

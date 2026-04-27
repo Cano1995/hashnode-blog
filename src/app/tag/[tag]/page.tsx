@@ -5,10 +5,9 @@ import { Navbar } from "@/components/blog/Navbar";
 import { Footer } from "@/components/blog/Footer";
 import { PostCard } from "@/components/blog/PostCard";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/siteUrl";
 
 export const revalidate = 3600;
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 type Params = { params: Promise<{ tag: string }> };
 
@@ -58,18 +57,18 @@ export default async function TagPage({ params, searchParams }: Params & { searc
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--c-bg)" }}>
       <Navbar siteName={settings.title} />
-      <main className="flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 py-10">
+      <main id="main-content" className="flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 py-10">
         <div
           className="flex items-center justify-between mb-6 pb-4"
           style={{ borderBottom: "1px solid var(--c-border)" }}
         >
           <div className="flex items-center gap-3">
-            <span
+            <h1
               className="px-2.5 py-1 rounded text-sm font-semibold"
               style={{ background: `${tag.color}22`, color: tag.color ?? "var(--c-primary)", border: `1px solid ${tag.color}44` }}
             >
               #{tag.name}
-            </span>
+            </h1>
             <span className="text-sm" style={{ color: "var(--c-muted)" }}>
               {total} artículo{total !== 1 ? "s" : ""}
             </span>
