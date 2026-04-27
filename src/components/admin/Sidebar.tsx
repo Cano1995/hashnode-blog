@@ -11,6 +11,8 @@ import {
   LogOut,
   Eye,
   Mail,
+  ShoppingBag,
+  Briefcase,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -20,6 +22,8 @@ const navItems = [
   { href: "/admin/posts", label: "Artículos", icon: FileText, exact: false },
   { href: "/admin/tags", label: "Etiquetas", icon: Tag, exact: false },
   { href: "/admin/subscribers", label: "Suscriptores", icon: Mail, exact: false },
+  { href: "/admin/productos", label: "Productos", icon: ShoppingBag, exact: false },
+  { href: "/admin/servicios", label: "Servicios", icon: Briefcase, exact: false },
   { href: "/admin/settings", label: "Configuración", icon: Settings, exact: false },
 ];
 

@@ -60,3 +60,34 @@ model Subscriber {
   unsubToken   String   @unique @default(cuid())
   createdAt    DateTime @default(now())
 }
+
+model Product {
+  id           String   @id @default(cuid())
+  name         String
+  description  String
+  imageUrl     String?
+  affiliateUrl String
+  price        String?
+  platform     String   @default("Udemy")
+  category     String?
+  active       Boolean  @default(true)
+  featured     Boolean  @default(false)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  details     String?
+  priceLabel  String?
+  icon        String?
+  contactUrl  String?
+  active      Boolean  @default(true)
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
