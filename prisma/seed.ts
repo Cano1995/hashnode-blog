@@ -1,29 +1,27 @@
 import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import path from "path";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const dbPath = path.resolve(process.cwd(), "dev.db");
-const adapter = new PrismaBetterSqlite3({ url: dbPath });
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const tagJs = await prisma.tag.upsert({
-    where: { slug: "javascript" },
+  const tagOracle = await prisma.tag.upsert({
+    where: { slug: "oracle-apex" },
     update: {},
-    create: { name: "JavaScript", slug: "javascript", color: "#eab308" },
+    create: { name: "Oracle APEX", slug: "oracle-apex", color: "#0969DA" },
   });
 
-  const tagReact = await prisma.tag.upsert({
-    where: { slug: "react" },
+  const tagForms = await prisma.tag.upsert({
+    where: { slug: "oracle-forms" },
     update: {},
-    create: { name: "React", slug: "react", color: "#0ea5e9" },
+    create: { name: "Oracle Forms", slug: "oracle-forms", color: "#CF222E" },
   });
 
-  const tagNextjs = await prisma.tag.upsert({
-    where: { slug: "nextjs" },
+  const tagPlsql = await prisma.tag.upsert({
+    where: { slug: "plsql" },
     update: {},
-    create: { name: "Next.js", slug: "nextjs", color: "#6366f1" },
+    create: { name: "PL/SQL", slug: "plsql", color: "#2DA44E" },
   });
 
   await prisma.siteSettings.upsert({
@@ -31,22 +29,22 @@ async function main() {
     update: {},
     create: {
       id: "settings",
-      title: "DevBlog",
-      description: "Un blog sobre tecnología y programación",
-      authorName: "Tu Nombre",
-      authorBio: "Desarrollador apasionado por la tecnología",
-      githubUrl: "https://github.com",
+      title: "Paraguayan Dev",
+      description: "Blog de Oracle APEX, Oracle Forms y Desarrollo Empresarial",
+      authorName: "Cristhian Cano Bogado",
+      authorBio: "Desarrollador especializado en Oracle APEX y migración de Oracle Forms.",
+      linkedinUrl: "https://www.linkedin.com/in/cristhian-cano-bogado-orclapex-86473713b/",
     },
   });
 
   const post1 = await prisma.post.upsert({
-    where: { slug: "bienvenido-a-mi-blog" },
+    where: { slug: "bienvenido-a-paraguayan-dev" },
     update: {},
     create: {
-      title: "Bienvenido a mi blog",
-      slug: "bienvenido-a-mi-blog",
-      excerpt: "Este es mi primer artículo, donde explico de qué va este blog y qué puedes esperar.",
-      content: `<h2>¡Bienvenido!</h2><p>Este es mi blog personal donde compartiré artículos sobre tecnología, programación y todo lo que aprendo en el camino.</p><h2>¿Qué encontrarás aquí?</h2><ul><li>Tutoriales de JavaScript y TypeScript</li><li>Proyectos con React y Next.js</li><li>Buenas prácticas de desarrollo</li></ul><p>¡Espero que el contenido te sea útil!</p>`,
+      title: "Bienvenido a Paraguayan Dev",
+      slug: "bienvenido-a-paraguayan-dev",
+      excerpt: "Un blog sobre Oracle APEX, migración de Oracle Forms y desarrollo empresarial desde Paraguay.",
+      content: `<h2>¡Bienvenido!</h2><p>Este blog nació para compartir conocimiento sobre Oracle APEX y el ecosistema Oracle con la comunidad hispanohablante.</p><h2>¿Qué encontrarás aquí?</h2><ul><li>Tutoriales de Oracle APEX</li><li>Guías de migración Oracle Forms</li><li>Tips de PL/SQL y SQL</li></ul>`,
       published: true,
       featured: true,
       readingTime: 2,
@@ -55,30 +53,10 @@ async function main() {
 
   await prisma.postTag.createMany({
     data: [
-      { postId: post1.id, tagId: tagJs.id },
-      { postId: post1.id, tagId: tagReact.id },
+      { postId: post1.id, tagId: tagOracle.id },
+      { postId: post1.id, tagId: tagForms.id },
     ],
-      });
-
-  const post2 = await prisma.post.upsert({
-    where: { slug: "primeros-pasos-con-nextjs" },
-    update: {},
-    create: {
-      title: "Primeros pasos con Next.js 16",
-      slug: "primeros-pasos-con-nextjs",
-      excerpt: "Next.js 16 trae Turbopack por defecto y muchas mejoras. Aprende a configurarlo.",
-      content: `<h2>Next.js 16</h2><p>La versión 16 de Next.js incluye cambios importantes como Turbopack como bundler por defecto.</p><h2>Instalación</h2><pre><code>npx create-next-app@latest mi-app</code></pre><p>Con esto tendrás un proyecto listo para desarrollar.</p>`,
-      published: true,
-      readingTime: 3,
-    },
   });
-
-  await prisma.postTag.createMany({
-    data: [
-      { postId: post2.id, tagId: tagNextjs.id },
-      { postId: post2.id, tagId: tagReact.id },
-    ],
-      });
 
   console.log("✅ Seed completado!");
 }
