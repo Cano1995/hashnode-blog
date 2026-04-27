@@ -21,19 +21,6 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  async redirects() {
-    return [
-      {
-        source: "/admin/((?!login$).*)",
-        missing: [
-          { type: "cookie", key: "__Secure-authjs.session-token" },
-          { type: "cookie", key: "authjs.session-token" },
-        ],
-        destination: "/admin/login",
-        permanent: false,
-      },
-    ];
-  },
   async headers() {
     return [
       {
