@@ -4,7 +4,12 @@ import { AdminSidebar } from "@/components/admin/Sidebar";
 import { SessionProvider } from "next-auth/react";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
+  let session;
+  try {
+    session = await auth();
+  } catch {
+    redirect("/admin/login");
+  }
 
   if (!session?.user) redirect("/admin/login");
 

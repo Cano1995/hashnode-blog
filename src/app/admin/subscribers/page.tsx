@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import { Mail, CheckCircle, Clock } from "lucide-react";
